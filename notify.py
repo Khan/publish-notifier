@@ -15,12 +15,12 @@ hipchat.config.token = secrets.hipchat_token
 def hipchat_notify(room_ids, message):
     # Pure kwargs don't work here because 'from' is a Python keyword...
     for room_id in room_ids:
-	hipchat.room.Room.message(**{
-	    'room_id': room_id,
-	    'from': 'Publish Primate',
-	    'message': message,
-	    'color': 'purple',
-	})
+        hipchat.room.Room.message(**{
+            'room_id': room_id,
+            'from': 'Publish Primate',
+            'message': message,
+            'color': 'purple',
+        })
 
 
 def get_version(url='http://www.khanacademy.org/api/v1/topicversion/default/id'):
@@ -67,7 +67,7 @@ def build_message(last_version, version):
         return ('Topic tree publish completed. Version %s -> %s<br>'
                 '&bull; Couldn\'t get the deets... /api/v1/topicversions returned a 500 :('
                 % (last_version, version))
-    
+
     return ('Topic tree publish completed. Version %s -> %s<br>'
             '&bull; Title: %s<br>'
             '&bull; Description: %s<br>'

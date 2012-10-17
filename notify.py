@@ -40,6 +40,7 @@ def get_version(url='http://www.khanacademy.org/api/v1/topicversion/default/id')
 
     return data
 
+
 def get_topicversion(version_num,
                      url='http://www.khanacademy.org/api/v1/topicversions'):
     try:
@@ -64,11 +65,12 @@ def get_topicversion(version_num,
 def build_message(last_version, version):
     topicversion = get_topicversion(version)
     if topicversion == None:
-        return ('Topic tree publish completed. Version %s -> %s<br>'
-                '&bull; Couldn\'t get the deets... /api/v1/topicversions returned a 500 :('
+        return ('Topic tree publish completed. Version %s &rarr; %s<br>'
+                '&bull; Couldn\'t get the deets... '
+                '/api/v1/topicversions returned a 500 :('
                 % (last_version, version))
 
-    return ('Topic tree publish completed. Version %s -> %s<br>'
+    return ('Topic tree publish completed. Version %s &rarr; %s<br>'
             '&bull; Title: %s<br>'
             '&bull; Description: %s<br>'
             '&bull; Last updated by: %s'

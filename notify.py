@@ -78,8 +78,12 @@ def build_message(last_version, version):
             topicversion['description'], topicversion['last_edited_by']))
 
 if __name__ == '__main__':
-    last_version = None
+    hipchat_notify(
+        secrets.hipchat_room_ids,
+        'Restarting notify.py!')
 
+    last_version = None
+ 
     while True:
         version = get_version()
         print version

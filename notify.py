@@ -23,7 +23,7 @@ def hipchat_notify(room_ids, message):
         })
 
 
-def get_version(url='http://www.khanacademy.org/api/v1/topicversion/default/id'):
+def get_publish(url='http://www.khanacademy.org/api/v1/dev/publish_status'):
     try:
         with contextlib.closing(urllib2.urlopen(url)) as f:
             data = json.loads(f.read())
@@ -41,58 +41,47 @@ def get_version(url='http://www.khanacademy.org/api/v1/topicversion/default/id')
     return data
 
 
-def get_topicversion(version_num,
-                     url='http://www.khanacademy.org/api/v1/topicversions'):
-    try:
-        with contextlib.closing(urllib2.urlopen(url)) as f:
-            data = json.loads(f.read())
-    except urllib2.URLError, e:
-        print "Couldn't get version: %s" % e
-        if isinstance(e, urllib2.HTTPError):
-            # When urlllib2 returns an HTTPError, the textual response returned
-            # by read() can be helpful when debugging.
-            print e.read()
-        return None
-    except socket.error, e:
-        print "Couldn't get version: socket error %s" % e
-        return None
+def build_message(publish, publish_status):
+    output = ['Publish task %s (%s): %s.' % (
+        publish["status_id"], publish["type"], publish_status)]
 
-    for topicversion in data:
-        if topicversion['number'] == version_num:
-            return topicversion
-
-
-def build_message(last_version, version):
-    topicversion = get_topicversion(version)
-    if topicversion == None:
-        return ('Topic tree publish completed. Version %s &rarr; %s<br>'
-                '&bull; Couldn\'t get the deets... '
-                '/api/v1/topicversions returned a 500 :('
-                % (last_version, version))
-
-    return ('Topic tree publish completed. Version %s &rarr; %s<br>'
-            '&bull; Title: %s<br>'
-            '&bull; Description: %s<br>'
-            '&bull; Last updated by: %s'
-            % (last_version, version, topicversion['title'],
-            topicversion['description'], topicversion['last_edited_by']))
+    if not publish["active"]:
+        output.append('&bull; Duration: %s' % publish["duration"])
+    if publish["owner"] != publish["commit_owner"]:
+        output.append('&bull; Published by: %s' % publish["owner"])
+    output.append('&bull; Commit: %s' % publish["commit_sha"])
+    output.append('&bull; Committer: %s' % publish["commit_owner"])
+    output.append('&bull; Commit message: %s' % publish["commit_message"])
+    return "<br>".join(output)
 
 if __name__ == '__main__':
     hipchat_notify(
         secrets.hipchat_room_ids,
         'Restarting notify.py!')
 
-    last_version = None
+    last_publish_id = None
+    last_publish_status = None
  
     while True:
-        version = get_version()
-        print version
+        publish = get_publish()
 
-        if version is not None:
-            if last_version is not None and version != last_version:
+        if publish is not None:
+            publish_status = "started"
+            if not publish["active"]:
+                publish_status = (
+                    "completed successfully" if publish["success"]
+                    else "failed")
+                print "%s: %s" % (publish["status_id"], publish_status)
+
+            if (last_publish_id is not None
+                and (publish["status_id"] != last_publish_id or
+                    publish_status != last_publish_status)):
                 hipchat_notify(
                     secrets.hipchat_room_ids,
-                    build_message(last_version, version))
-            last_version = version
+                    build_message(publish, publish_status))
+            last_publish_id = publish["status_id"]
+            last_publish_status = publish_status
+        else:
+            print "No publish received"
 
         time.sleep(10)

@@ -52,6 +52,7 @@ def build_message(publish, publish_status):
     output.append('&bull; Commit: %s' % publish["commit_sha"])
     output.append('&bull; Committer: %s' % publish["commit_owner"])
     output.append('&bull; Commit message: %s' % publish["commit_message"])
+    # TODO(dylan): Also report subject/tutorial titles in the message
     return "<br>".join(output)
 
 if __name__ == '__main__':

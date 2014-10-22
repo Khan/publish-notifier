@@ -23,7 +23,8 @@ def hipchat_notify(room_ids, message):
         })
 
 
-def get_publish(url='http://www.khanacademy.org/api/v1/dev/publish_status'):
+def get_publish(
+        url='http://www.khanacademy.org/api/internal/dev/publish_status'):
     try:
         with contextlib.closing(urllib2.urlopen(url)) as f:
             data = json.loads(f.read())
